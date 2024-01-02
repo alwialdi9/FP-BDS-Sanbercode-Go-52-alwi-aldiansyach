@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type (
 	Menu struct {
@@ -14,3 +18,11 @@ type (
 		Restaurant   Restaurant `json:"-"`
 	}
 )
+
+func CreateMenus(db *gorm.DB, u []Menu) (int, error) {
+
+	menus := u
+	result := db.Create(menus)
+
+	return int(result.RowsAffected), result.Error
+}

@@ -9,6 +9,24 @@ definitions:
     - email
     - password
     type: object
+  controllers.MenuParams:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: string
+    type: object
+  controllers.MenuRestaurantInput:
+    properties:
+      menus:
+        items:
+          $ref: '#/definitions/controllers.MenuParams'
+        type: array
+      restaurant_id:
+        type: string
+    type: object
   controllers.RegisterInput:
     properties:
       email:
@@ -41,6 +59,36 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
 paths:
+  /create/menus:
+    post:
+      consumes:
+      - application/json
+      description: Add menu by id Restaurant
+      parameters:
+      - description: the body to create a menu restaurant
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.MenuRestaurantInput'
+      - description: 'Authorization. How to input in swagger : ''Bearer <insert_your_token_here>'''
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerToken: []
+      summary: Create Menus
+      tags:
+      - accounts
   /login:
     post:
       consumes:
@@ -97,6 +145,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/controllers.RestaurantInput'
+      - description: 'Authorization. How to input in swagger : ''Bearer <insert_your_token_here>'''
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -105,6 +158,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - BearerToken: []
       summary: Create data Restaurant
       tags:
       - restaurant

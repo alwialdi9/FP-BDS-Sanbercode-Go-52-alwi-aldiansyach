@@ -28,3 +28,13 @@ func (u *Restaurant) SaveRestaurant(db *gorm.DB) (*Restaurant, error) {
 	}
 	return u, nil
 }
+
+func SearchRestaurant(id string, db *gorm.DB) (Restaurant, error) {
+	var err error
+	resto := Restaurant{}
+	err = db.Model(resto).Where("id = ?", id).Take(&resto).Error
+	if err != nil {
+		return resto, err
+	}
+	return resto, nil
+}

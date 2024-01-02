@@ -3,8 +3,14 @@ package routes
 import (
 	"final-project/controllers"
 	"final-project/middlewares"
+	"final-project/utils"
+	"fmt"
+	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	timeout "github.com/vearne/gin-timeout"
 	"gorm.io/gorm"
 
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
@@ -18,13 +24,23 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		c.Set("db", db)
 	})
 
+	timeoutval, _ := strconv.Atoi(utils.Getenv("HANDLER_TIMEOUT", "5"))
+
+	r.Use(timeout.Timeout(
+		timeout.WithTimeout(time.Duration(timeoutval)*time.Second),
+		timeout.WithErrorHttpCode(http.StatusRequestTimeout),                                   // optional
+		timeout.WithDefaultMsg(`{"status": "Request Timeout", "msg":"http: Handler timeout"}`), // optional
+		timeout.WithCallBack(func(r *http.Request) {
+			fmt.Println("timeout happen, url:", r.URL.String())
+		}))) // optional
+
 	r.POST("/register", controllers.Register)
 	r.POST("/login", controllers.Login)
 
-	moviesMiddlewareRoute := r.Group("/restaurant")
-	moviesMiddlewareRoute.Use(middlewares.JwtAuthMiddleware(db))
-	moviesMiddlewareRoute.POST("/create", controllers.CreateRestaurant)
-	// moviesMiddlewareRoute.POST("/order/history", controllers.UpdateMovie)
+	MiddlewareRoute := r.Group("/restaurant")
+	MiddlewareRoute.Use(middlewares.JwtAuthMiddleware(db))
+	MiddlewareRoute.POST("/create", controllers.CreateRestaurant)
+	MiddlewareRoute.POST("/create/menus", controllers.CreateMenus)
 	// moviesMiddlewareRoute.DELETE("/:id", controllers.DeleteMovie)
 
 	// r.GET("/age-rating-categories", controllers.GetAllRating)
