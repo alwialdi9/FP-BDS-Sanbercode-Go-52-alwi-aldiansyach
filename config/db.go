@@ -10,9 +10,9 @@ import (
 
 func ConnectDataBase() *gorm.DB {
 	username := "root"
-	password := ""
-	host := "tcp(127.0.0.1:3306)"
-	database := "restaurant_db"
+	password := "1d1--63-2gEgfCbDH2adaFeagaG1-b3H"
+	host := "viaduct.proxy.rlwy.net"
+	database := "railway"
 
 	dsn := fmt.Sprintf("%v:%v@%v/%v?charset=utf8mb4&parseTime=True&loc=Local", username, password, host, database)
 
