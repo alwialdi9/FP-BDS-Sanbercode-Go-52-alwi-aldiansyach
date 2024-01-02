@@ -2,7 +2,6 @@ package config
 
 import (
 	"final-project/models"
-	"final-project/utils"
 	"fmt"
 
 	"gorm.io/driver/mysql"
@@ -10,10 +9,10 @@ import (
 )
 
 func ConnectDataBase() *gorm.DB {
-	username := utils.Getenv("MYSQLUSER", "root")
-	password := utils.Getenv("MYSQL_ROOT_PASSWORD", "")
+	username := "root"
+	password := "1d1--63-2gEgfCbDH2adaFeagaG1-b3H"
 	host := "viaduct.proxy.rlwy.net:52716"
-	database := utils.Getenv("MYSQL_DATABASE", "restaurant_api")
+	database := "railway"
 
 	dsn := fmt.Sprintf("%v:%v@%v/%v?charset=utf8mb4&parseTime=True&loc=Local", username, password, host, database)
 
