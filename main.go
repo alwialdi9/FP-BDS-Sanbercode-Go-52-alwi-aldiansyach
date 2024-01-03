@@ -34,7 +34,7 @@ func main() {
 	docs.SwaggerInfo.Title = "Swagger Example API"
 	docs.SwaggerInfo.Description = "This is a sample server Restaurant."
 	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.Host = "0.0.0.0:8080"
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	// database connection
@@ -44,5 +44,5 @@ func main() {
 
 	// router
 	r := routes.SetupRouter(db)
-	r.Run("localhost:8080")
+	r.Run("0.0.0.0:8080")
 }
