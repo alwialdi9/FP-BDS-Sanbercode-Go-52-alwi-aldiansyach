@@ -49,6 +49,36 @@ definitions:
       name:
         type: string
     type: object
+  models.OrderHistory:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      restaurantID:
+        type: integer
+      total_price:
+        type: integer
+      updated_at:
+        type: string
+      userID:
+        type: integer
+    type: object
+  models.Restaurant:
+    properties:
+      city:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
 info:
   contact:
     email: support@swagger.io
@@ -76,6 +106,88 @@ paths:
         name: Authorization
         required: true
         type: string
+      - description: HTTP-X-UID. Fill with id user
+        in: header
+        name: HTTP-X-UID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerToken: []
+      summary: Create Menus
+      tags:
+      - Menus
+  /create/orders:
+    post:
+      consumes:
+      - application/json
+      description: Create order user by resto
+      parameters:
+      - description: Account ID
+        in: path
+        name: Body
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/models.OrderHistory'
+            type: object
+      summary: Create order
+      tags:
+      - User
+  /delete/menus:
+    delete:
+      consumes:
+      - application/json
+      description: Delete menus by restaurant id
+      parameters:
+      - description: menus id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 'Authorization. How to input in swagger : ''Bearer <insert_your_token_here>'''
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: HTTP-X-UID. Fill with id user
+        in: header
+        name: HTTP-X-UID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerToken: []
+      summary: Delete Menus
+      tags:
+      - menus
+  /get_all_resto:
+    get:
+      consumes:
+      - application/json
+      description: Get data for all resto
       produces:
       - application/json
       responses:
@@ -84,11 +196,9 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      security:
-      - BearerToken: []
-      summary: Create Menus
+      summary: Get All Restaurant
       tags:
-      - accounts
+      - restaurant
   /login:
     post:
       consumes:
@@ -150,17 +260,44 @@ paths:
         name: Authorization
         required: true
         type: string
+      - description: HTTP-X-UID. Fill with id user
+        in: header
+        name: HTTP-X-UID
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
+            additionalProperties:
+              $ref: '#/definitions/models.Restaurant'
             type: object
       security:
       - BearerToken: []
       summary: Create data Restaurant
       tags:
       - restaurant
+  /show/order/:id/restaurant:
+    get:
+      consumes:
+      - application/json
+      description: Get Order by id
+      parameters:
+      - description: Restaurant id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.OrderHistory'
+      summary: Show Order By Resto
+      tags:
+      - Order User
 swagger: "2.0"

@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type (
 	OrderHistory struct {
@@ -12,6 +16,14 @@ type (
 		Restaurant   Restaurant `json:"-"`
 		UserID       uint       `json:"userID"`
 		User         User       `json:"-"`
-		Menus        []Menu     `json:"-" gorm:"many2many:menu;"`
+		Menus        []Menu     `json:"-" gorm:"many2many:orderHistory_menus;"`
 	}
 )
+
+func CreateOrders(db *gorm.DB, u OrderHistory) (OrderHistory, error) {
+
+	orders := u
+	var err error = db.Create(&orders).Error
+
+	return orders, err
+}

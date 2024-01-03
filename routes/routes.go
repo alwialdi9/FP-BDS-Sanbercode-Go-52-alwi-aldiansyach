@@ -24,6 +24,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		c.Set("db", db)
 	})
 
+	gin.SetMode(gin.ReleaseMode)
+
 	timeoutval, _ := strconv.Atoi(utils.Getenv("HANDLER_TIMEOUT", "5"))
 
 	r.Use(timeout.Timeout(
@@ -41,17 +43,14 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	MiddlewareRoute.Use(middlewares.JwtAuthMiddleware(db))
 	MiddlewareRoute.POST("/create", controllers.CreateRestaurant)
 	MiddlewareRoute.POST("/create/menus", controllers.CreateMenus)
-	// moviesMiddlewareRoute.DELETE("/:id", controllers.DeleteMovie)
+	MiddlewareRoute.DELETE("/delete/menus/:id", controllers.DeleteMenus)
 
-	// r.GET("/age-rating-categories", controllers.GetAllRating)
-	// r.GET("/age-rating-categories/:id", controllers.GetRatingById)
-	// r.GET("/age-rating-categories/:id/movies", controllers.GetMoviesByRatingId)
+	r.GET("/get_all_resto", controllers.GetAllRestaurant)
 
-	// ratingMiddlewareRoute := r.Group("/age-rating-categories")
-	// ratingMiddlewareRoute.Use(middlewares.JwtAuthMiddleware())
-	// ratingMiddlewareRoute.POST("/", controllers.CreateRating)
-	// ratingMiddlewareRoute.PATCH("/:id", controllers.UpdateRating)
-	// ratingMiddlewareRoute.DELETE("/:id", controllers.DeleteRating)
+	UserMiddlewareRoute := r.Group("/user")
+	UserMiddlewareRoute.Use(middlewares.JwtAuthMiddleware(db))
+	UserMiddlewareRoute.POST("/create/orders", controllers.CreateOrder)
+	UserMiddlewareRoute.GET("/show/order/:id/restaurant", controllers.ShowOrderByResto)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

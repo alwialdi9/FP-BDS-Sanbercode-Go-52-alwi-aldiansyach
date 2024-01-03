@@ -49,7 +49,7 @@ func Login(c *gin.Context) {
 	u.Email = input.Email
 	u.Password = input.Password
 
-	token, username, err := models.LoginCheck(u.Email, u.Password, db)
+	token, username, id, err := models.LoginCheck(u.Email, u.Password, db)
 
 	if err != nil {
 		log.Println(err)
@@ -62,7 +62,7 @@ func Login(c *gin.Context) {
 		"email":    u.Email,
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Login Success", "user": user, "token": token})
+	c.JSON(http.StatusOK, gin.H{"message": "Login Success", "user": user, "token": token, "id": id})
 }
 
 // Register godoc

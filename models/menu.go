@@ -26,3 +26,14 @@ func CreateMenus(db *gorm.DB, u []Menu) (int, error) {
 
 	return int(result.RowsAffected), result.Error
 }
+
+func CountTotalPrice(id string, quantity int, db *gorm.DB) (Menu, int, error) {
+	var err error
+	menu := Menu{}
+	err = db.Where("id = ?", id).Take(&menu).Error
+	if err != nil {
+		return menu, 0, err
+	}
+	price := menu.Price * quantity
+	return menu, price, nil
+}

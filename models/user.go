@@ -38,7 +38,7 @@ func CheckAdmin(id string, db *gorm.DB) User {
 	return u
 }
 
-func LoginCheck(email string, password string, db *gorm.DB) (string, string, error) {
+func LoginCheck(email string, password string, db *gorm.DB) (string, string, uint, error) {
 	var err error
 
 	u := User{}
@@ -46,21 +46,21 @@ func LoginCheck(email string, password string, db *gorm.DB) (string, string, err
 	err = db.Model(User{}).Where("email = ?", email).Take(&u).Error
 
 	if err != nil {
-		return "", "", err
+		return "", "", 0, err
 	}
 
 	err = VerifyPassword(password, u.Password)
 
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
-		return "", "", err
+		return "", "", 0, err
 	}
 
 	token, err := token.GenerateToken(u.ID)
 
 	if err != nil {
-		return "", "", err
+		return "", "", 0, err
 	}
-	return token, u.Username, nil
+	return token, u.Username, u.ID, nil
 }
 
 func (u *User) SaveUser(db *gorm.DB) (*User, error) {

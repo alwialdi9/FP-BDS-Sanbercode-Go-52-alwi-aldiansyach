@@ -25,6 +25,29 @@ type MenuRestaurantInput struct {
 	Menus []MenuParams `json:"menus"`
 }
 
+type APIRestaurant struct {
+	ID   uint
+	Name string
+	City string
+}
+
+// ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
+// @Summary Get All Restaurant
+// @Description Get data for all resto
+// @Tags restaurant
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} map[string]any
+// @Router /get_all_resto [get]
+func GetAllRestaurant(c *gin.Context) {
+	// get db from gin context
+	db := c.MustGet("db").(*gorm.DB)
+	var restaurant []APIRestaurant
+	db.Model(&models.Restaurant{}).Find(&restaurant)
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": restaurant})
+}
+
 // ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
 // @Summary Create data Restaurant
 // @Description Create Restaurant
@@ -33,8 +56,9 @@ type MenuRestaurantInput struct {
 // @Produce  json
 // @Param Body body RestaurantInput true "the body to create a restaurant"
 // @Param Authorization header string true "Authorization. How to input in swagger : 'Bearer <insert_your_token_here>'"
+// @Param HTTP-X-UID header string true "HTTP-X-UID. Fill with id user"
 // @Security BearerToken
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} map[string]models.Restaurant
 // @Router /restaurant/create [post]
 func CreateRestaurant(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
@@ -75,13 +99,14 @@ func CreateRestaurant(c *gin.Context) {
 // ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
 // @Summary Create Menus
 // @Description Add menu by id Restaurant
-// @Tags accounts
+// @Tags Menus
 // @Accept  json
 // @Produce  json
 // @Param Body body MenuRestaurantInput true "the body to create a menu restaurant"
 // @Param Authorization header string true "Authorization. How to input in swagger : 'Bearer <insert_your_token_here>'"
+// @Param HTTP-X-UID header string true "HTTP-X-UID. Fill with id user"
 // @Security BearerToken
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} map[string]string
 // @Router /create/menus [post]
 func CreateMenus(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
@@ -121,4 +146,37 @@ func CreateMenus(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": `success create ` + strconv.Itoa(rows) + ` Menu restaurant`})
+}
+
+// ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
+// @Summary Delete Menus
+// @Description Delete menus by restaurant id
+// @Tags menus
+// @Accept  json
+// @Produce  json
+// @Param id path string true "menus id"
+// @Param Authorization header string true "Authorization. How to input in swagger : 'Bearer <insert_your_token_here>'"
+// @Param HTTP-X-UID header string true "HTTP-X-UID. Fill with id user"
+// @Security BearerToken
+// @Success 200 {object} map[string]string
+// @Router /delete/menus [delete]
+func DeleteMenus(c *gin.Context) {
+	// Get model if exist
+	db := c.MustGet("db").(*gorm.DB)
+	resto_id := c.Query("restoId")
+
+	if resto_id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Incomplete Parameter"})
+		return
+	}
+
+	var menus models.Menu
+	if err := db.Where("id = ? AND restaurant_id = ?", c.Param("id"), resto_id).First(&menus).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		return
+	}
+
+	db.Delete(&menus)
+
+	c.JSON(http.StatusOK, gin.H{"data": "Success delete Menus "})
 }
