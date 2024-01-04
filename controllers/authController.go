@@ -176,10 +176,9 @@ func GetResetLink(c *gin.Context) {
 // @Tags User
 // @Accept  json
 // @Produce  json
-// @Param id path string true "Account ID"
-// @Success 200 {object} model.Account
-// @Failure 400 {object} model.HTTPError
-// @Router /reset_password/:token [post]
+// @Param id token string true "token"
+// @Success 200 {object} map[string]string
+// @Router /reset_password [post]
 func ResetPassword(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	var input ResetPassInput
