@@ -14,8 +14,8 @@ type Menu struct {
 }
 
 type OrderMenuInput struct {
-	RestaurantID string `json:"restaurant_id"`
-	Menus        []Menu `json:"order_menu"`
+	RestaurantID string `json:"restaurant_id" binding:"required"`
+	Menus        []Menu `json:"order_menu" binding:"required"`
 }
 
 type ResponseOrder struct {
@@ -39,7 +39,7 @@ type ReviewUserInput struct {
 // @Param Authorization header string true "Authorization. How to input in swagger : 'Bearer <insert_your_token_here>'"
 // @Param HTTP-X-UID header string true "HTTP-X-UID. Fill with id user"
 // @Security BearerToken
-// @Param Body OrderMenuInput true "for create order"
+// @Param Body body OrderMenuInput true "for create order"
 // @Success 200 {object} map[string]models.OrderHistory
 // @Router /create/orders [post]
 func CreateOrder(c *gin.Context) {

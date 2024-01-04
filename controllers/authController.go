@@ -176,7 +176,7 @@ func GetResetLink(c *gin.Context) {
 // @Tags User
 // @Accept  json
 // @Produce  json
-// @Param id token string true "token"
+// @Param id path string true "token"
 // @Success 200 {object} map[string]string
 // @Router /reset_password [post]
 func ResetPassword(c *gin.Context) {
