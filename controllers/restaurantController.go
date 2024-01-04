@@ -45,7 +45,20 @@ func GetAllRestaurant(c *gin.Context) {
 	var restaurant []APIRestaurant
 	db.Model(&models.Restaurant{}).Find(&restaurant)
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "data": restaurant})
+	response := []map[string]any{}
+
+	for _, v := range restaurant {
+		ratingAvg, totalReview, err := models.SearchReviewByResto(v.ID, db)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		data := map[string]any{"id": v.ID, "name": v.Name, "city": v.City, "total_review": totalReview, "rating_avg": ratingAvg}
+
+		response = append(response, data)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": response})
 }
 
 // ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html

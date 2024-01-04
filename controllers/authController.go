@@ -2,11 +2,14 @@ package controllers
 
 import (
 	"final-project/models"
+	"final-project/utils"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -25,6 +28,15 @@ type RegisterInput struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 	Role     string `json:"role"`
+}
+
+type ResetLinkInput struct {
+	Email string `json:"email" binding:"required"`
+}
+
+type ResetPassInput struct {
+	Password    string `json:"password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required"`
 }
 
 // ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
@@ -111,4 +123,110 @@ func Register(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "registration success", "user": user})
 
+}
+
+// ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
+// @Summary Get Reset Link
+// @Description get Link by ID
+// @Tags User
+// @Accept  json
+// @Produce  json
+// @Param Body body RegisterInput true "the body to register a user"
+// @Success 200 {object} map[string]any
+// @Router /get_reset_link [post]
+func GetResetLink(c *gin.Context) {
+	db := c.MustGet("db").(*gorm.DB)
+	var input ResetLinkInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	u := models.User{}
+	err := db.Model(models.User{}).Where("email = ?", input.Email).Take(&u).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	email := u.Email
+
+	if email == "" {
+		c.JSON(http.StatusOK, gin.H{"message": "User not found"})
+		return
+	}
+
+	resetToken := utils.GetToken(10)
+	u.ResetCode = resetToken
+	u.ResetTime = time.Now().Add(time.Minute * 15)
+
+	db.Save(&u)
+
+	response := map[string]any{
+		"email":        u.Email,
+		"reset_link":   c.Request.Host + "/reset_password/" + u.ResetCode,
+		"link_expired": u.ResetTime.Format("02 January 2006 15:04:05"),
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": response})
+}
+
+// ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
+// @Summary Reset Password
+// @Description reset password
+// @Tags User
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Account ID"
+// @Success 200 {object} model.Account
+// @Failure 400 {object} model.HTTPError
+// @Router /reset_password/:token [post]
+func ResetPassword(c *gin.Context) {
+	db := c.MustGet("db").(*gorm.DB)
+	var input ResetPassInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	token := c.Param("token")
+
+	u := models.User{}
+	err := db.Model(models.User{}).Where("reset_code = ?", token).Take(&u).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	resetTime := u.ResetTime
+
+	if resetTime.Before(time.Now()) {
+		c.JSON(http.StatusOK, gin.H{"message": "link expired, please call reset_link endpoint again"})
+		return
+	}
+
+	password := input.Password
+	new_password := input.NewPassword
+
+	errPass := models.VerifyPassword(password, u.Password)
+
+	if errPass != nil && errPass == bcrypt.ErrMismatchedHashAndPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"error": errPass.Error()})
+		return
+	}
+
+	hashedPassword, errPassword := bcrypt.GenerateFromPassword([]byte(new_password), bcrypt.DefaultCost)
+	if errPassword != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": errPassword.Error()})
+		return
+	}
+	u.Password = string(hashedPassword)
+	u.ResetCode = ""
+	db.Save(&u)
+
+	response := map[string]any{
+		"message": "Success reset password",
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": response})
 }

@@ -30,14 +30,16 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	r.Use(timeout.Timeout(
 		timeout.WithTimeout(time.Duration(timeoutval)*time.Second),
-		timeout.WithErrorHttpCode(http.StatusRequestTimeout),                                   // optional
-		timeout.WithDefaultMsg(`{"status": "Request Timeout", "msg":"http: Handler timeout"}`), // optional
+		timeout.WithErrorHttpCode(http.StatusRequestTimeout),
+		timeout.WithDefaultMsg(`{"status": "Request Timeout", "msg":"http: Handler timeout"}`),
 		timeout.WithCallBack(func(r *http.Request) {
 			fmt.Println("timeout happen, url:", r.URL.String())
-		}))) // optional
+		})))
 
 	r.POST("/register", controllers.Register)
 	r.POST("/login", controllers.Login)
+	r.POST("/get_reset_link", controllers.GetResetLink)
+	r.POST("/reset_password/:token", controllers.ResetPassword)
 
 	MiddlewareRoute := r.Group("/restaurant")
 	MiddlewareRoute.Use(middlewares.JwtAuthMiddleware(db))
@@ -51,6 +53,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	UserMiddlewareRoute.Use(middlewares.JwtAuthMiddleware(db))
 	UserMiddlewareRoute.POST("/create/orders", controllers.CreateOrder)
 	UserMiddlewareRoute.GET("/show/order/:id/restaurant", controllers.ShowOrderByResto)
+	UserMiddlewareRoute.POST("/send_review", controllers.CreateReview)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

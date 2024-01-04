@@ -24,13 +24,22 @@ type ResponseOrder struct {
 	Menus      []Menu `json:"-" gorm:"many2many:orderHistory_menus;"`
 }
 
+type ReviewUserInput struct {
+	Content      string `json:"content"`
+	Rating       int    `json:"rating"`
+	RestaurantID string `json:"restaurant_id"`
+}
+
 // ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
 // @Summary Create order
 // @Description Create order user by resto
 // @Tags User
 // @Accept  json
 // @Produce  json
-// @Param Body path string true "Account ID"
+// @Param Authorization header string true "Authorization. How to input in swagger : 'Bearer <insert_your_token_here>'"
+// @Param HTTP-X-UID header string true "HTTP-X-UID. Fill with id user"
+// @Security BearerToken
+// @Param Body OrderMenuInput true "for create order"
 // @Success 200 {object} map[string]models.OrderHistory
 // @Router /create/orders [post]
 func CreateOrder(c *gin.Context) {
@@ -110,4 +119,55 @@ func ShowOrderByResto(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": result})
+}
+
+// ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
+// @Summary Create Review
+// @Description Endpoint for create review user
+// @Tags User
+// @Accept  json
+// @Produce  json
+// @Param Authorization header string true "Authorization. How to input in swagger : 'Bearer <insert_your_token_here>'"
+// @Param HTTP-X-UID header string true "HTTP-X-UID. Fill with id user"
+// @Security BearerToken
+// @Param body ReviewUserInput true "the body to create a review"
+// @Success 200 {object} map[string]any
+// @Router /send_review [post]
+func CreateReview(c *gin.Context) {
+	db := c.MustGet("db").(*gorm.DB)
+	var input ReviewUserInput
+
+	user := c.Value("common_request").(models.CommonRequest).User
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	restaurant, err := models.SearchRestaurant(input.RestaurantID, db)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	review := models.Review{}
+
+	review.User = user
+	review.Restaurant = restaurant
+	review.Content = input.Content
+	review.Rating = input.Rating
+
+	_, errCreate := review.CreateReview(db)
+	if errCreate != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	reviewResult := map[string]any{
+		"content":    input.Content,
+		"rating":     input.Rating,
+		"user":       user.Username,
+		"restaurant": restaurant.Name,
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "success create review", "data": reviewResult})
 }

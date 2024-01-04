@@ -17,6 +17,8 @@ type (
 		Email        string         `json:"email" gorm:"not null;unique"`
 		Password     string         `json:"password"`
 		Role         string         `json:"role"`
+		ResetCode    string         `json:"reset_code"`
+		ResetTime    time.Time      `json:"reset_time"`
 		CreatedAt    time.Time      `json:"created_at"`
 		UpdatedAt    time.Time      `json:"updated_at"`
 		Review       []Review       `json:"-"`
