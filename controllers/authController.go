@@ -131,7 +131,7 @@ func Register(c *gin.Context) {
 // @Tags User
 // @Accept  json
 // @Produce  json
-// @Param Body body RegisterInput true "the body to register a user"
+// @Param Body body ResetLinkInput true "the body to get reset link password"
 // @Success 200 {object} map[string]any
 // @Router /get_reset_link [post]
 func GetResetLink(c *gin.Context) {
@@ -176,7 +176,7 @@ func GetResetLink(c *gin.Context) {
 // @Tags User
 // @Accept  json
 // @Produce  json
-// @Param id path string true "token"
+// @Param Body body ResetPassInput true "the body to reset password"
 // @Success 200 {object} map[string]string
 // @Router /reset_password [post]
 func ResetPassword(c *gin.Context) {

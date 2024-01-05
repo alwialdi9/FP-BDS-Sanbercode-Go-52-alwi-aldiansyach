@@ -167,10 +167,10 @@ func CreateMenus(c *gin.Context) {
 // @Tags menus
 // @Accept  json
 // @Produce  json
-// @Param id path string true "menus id"
 // @Param Authorization header string true "Authorization. How to input in swagger : 'Bearer <insert_your_token_here>'"
 // @Param HTTP-X-UID header string true "HTTP-X-UID. Fill with id user"
 // @Security BearerToken
+// @Param id path string true "restaurant id"
 // @Success 200 {object} map[string]string
 // @Router /delete/menus [delete]
 func DeleteMenus(c *gin.Context) {
