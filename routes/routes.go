@@ -24,7 +24,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		c.Set("db", db)
 	})
 
-	gin.SetMode(gin.ReleaseMode)
+	// gin.SetMode(gin.ReleaseMode)
 
 	timeoutval, _ := strconv.Atoi(utils.Getenv("HANDLER_TIMEOUT", "5"))
 

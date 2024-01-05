@@ -74,6 +74,7 @@ func (u *User) SaveUser(db *gorm.DB) (*User, error) {
 	u.Password = string(hashedPassword)
 	//remove spaces in username
 	u.Username = html.EscapeString(strings.TrimSpace(u.Username))
+	u.ResetTime = time.Now()
 
 	var err error = db.Create(&u).Error
 	if err != nil {
