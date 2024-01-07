@@ -26,8 +26,8 @@ type ResponseOrder struct {
 
 type ReviewUserInput struct {
 	Content      string `json:"content"`
-	Rating       int    `json:"rating"`
-	RestaurantID string `json:"restaurant_id"`
+	Rating       int    `json:"rating" binding:"required"`
+	RestaurantID string `json:"restaurant_id" binding:"required"`
 }
 
 // ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
@@ -130,7 +130,7 @@ func ShowOrderByResto(c *gin.Context) {
 // @Param Authorization header string true "Authorization. How to input in swagger : 'Bearer <insert_your_token_here>'"
 // @Param HTTP-X-UID header string true "HTTP-X-UID. Fill with id user"
 // @Security BearerToken
-// @Param body ReviewUserInput true "the body to create a review"
+// @Param body body ReviewUserInput true "the body to create a review"
 // @Success 200 {object} map[string]any
 // @Router /send_review [post]
 func CreateReview(c *gin.Context) {

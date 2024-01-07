@@ -9,6 +9,13 @@ definitions:
     - email
     - password
     type: object
+  controllers.Menu:
+    properties:
+      id:
+        type: string
+      quantity:
+        type: integer
+    type: object
   controllers.MenuParams:
     properties:
       description:
@@ -27,6 +34,18 @@ definitions:
       restaurant_id:
         type: string
     type: object
+  controllers.OrderMenuInput:
+    properties:
+      order_menu:
+        items:
+          $ref: '#/definitions/controllers.Menu'
+        type: array
+      restaurant_id:
+        type: string
+    required:
+    - order_menu
+    - restaurant_id
+    type: object
   controllers.RegisterInput:
     properties:
       email:
@@ -42,12 +61,41 @@ definitions:
     - password
     - username
     type: object
+  controllers.ResetLinkInput:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  controllers.ResetPassInput:
+    properties:
+      new_password:
+        type: string
+      password:
+        type: string
+    required:
+    - new_password
+    - password
+    type: object
   controllers.RestaurantInput:
     properties:
       city:
         type: string
       name:
         type: string
+    type: object
+  controllers.ReviewUserInput:
+    properties:
+      content:
+        type: string
+      rating:
+        type: integer
+      restaurant_id:
+        type: string
+    required:
+    - rating
+    - restaurant_id
     type: object
   models.OrderHistory:
     properties:
@@ -131,11 +179,22 @@ paths:
       - application/json
       description: Create order user by resto
       parameters:
-      - description: Account ID
-        in: path
-        name: Body
+      - description: 'Authorization. How to input in swagger : ''Bearer <insert_your_token_here>'''
+        in: header
+        name: Authorization
         required: true
         type: string
+      - description: HTTP-X-UID. Fill with id user
+        in: header
+        name: HTTP-X-UID
+        required: true
+        type: string
+      - description: for create order
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.OrderMenuInput'
       produces:
       - application/json
       responses:
@@ -145,6 +204,8 @@ paths:
             additionalProperties:
               $ref: '#/definitions/models.OrderHistory'
             type: object
+      security:
+      - BearerToken: []
       summary: Create order
       tags:
       - User
@@ -154,11 +215,6 @@ paths:
       - application/json
       description: Delete menus by restaurant id
       parameters:
-      - description: menus id
-        in: path
-        name: id
-        required: true
-        type: string
       - description: 'Authorization. How to input in swagger : ''Bearer <insert_your_token_here>'''
         in: header
         name: Authorization
@@ -167,6 +223,11 @@ paths:
       - description: HTTP-X-UID. Fill with id user
         in: header
         name: HTTP-X-UID
+        required: true
+        type: string
+      - description: restaurant id
+        in: path
+        name: id
         required: true
         type: string
       produces:
@@ -199,6 +260,29 @@ paths:
       summary: Get All Restaurant
       tags:
       - restaurant
+  /get_reset_link:
+    post:
+      consumes:
+      - application/json
+      description: get Link by ID
+      parameters:
+      - description: the body to get reset link password
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.ResetLinkInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Reset Link
+      tags:
+      - Auth
   /login:
     post:
       consumes:
@@ -243,6 +327,30 @@ paths:
       summary: Register a user.
       tags:
       - Auth
+  /reset_password:
+    post:
+      consumes:
+      - application/json
+      description: reset password
+      parameters:
+      - description: the body to reset password
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.ResetPassInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Reset Password
+      tags:
+      - Auth
   /restaurant/create:
     post:
       consumes:
@@ -279,6 +387,41 @@ paths:
       summary: Create data Restaurant
       tags:
       - restaurant
+  /send_review:
+    post:
+      consumes:
+      - application/json
+      description: Endpoint for create review user
+      parameters:
+      - description: 'Authorization. How to input in swagger : ''Bearer <insert_your_token_here>'''
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: HTTP-X-UID. Fill with id user
+        in: header
+        name: HTTP-X-UID
+        required: true
+        type: string
+      - description: the body to create a review
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.ReviewUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerToken: []
+      summary: Create Review
+      tags:
+      - User
   /show/order/:id/restaurant:
     get:
       consumes:

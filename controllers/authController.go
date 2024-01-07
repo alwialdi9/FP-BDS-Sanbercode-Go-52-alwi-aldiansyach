@@ -128,7 +128,7 @@ func Register(c *gin.Context) {
 // ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
 // @Summary Get Reset Link
 // @Description get Link by ID
-// @Tags User
+// @Tags Auth
 // @Accept  json
 // @Produce  json
 // @Param Body body ResetLinkInput true "the body to get reset link password"
@@ -173,7 +173,7 @@ func GetResetLink(c *gin.Context) {
 // ref: https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
 // @Summary Reset Password
 // @Description reset password
-// @Tags User
+// @Tags Auth
 // @Accept  json
 // @Produce  json
 // @Param Body body ResetPassInput true "the body to reset password"

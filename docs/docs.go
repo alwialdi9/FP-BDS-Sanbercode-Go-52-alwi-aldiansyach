@@ -82,6 +82,11 @@ const docTemplate = `{
         },
         "/create/orders": {
             "post": {
+                "security": [
+                    {
+                        "BearerToken": []
+                    }
+                ],
                 "description": "Create order user by resto",
                 "consumes": [
                     "application/json"
@@ -96,10 +101,26 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Account ID",
-                        "name": "Body",
-                        "in": "path",
+                        "description": "Authorization. How to input in swagger : 'Bearer \u003cinsert_your_token_here\u003e'",
+                        "name": "Authorization",
+                        "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "HTTP-X-UID. Fill with id user",
+                        "name": "HTTP-X-UID",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "for create order",
+                        "name": "Body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.OrderMenuInput"
+                        }
                     }
                 ],
                 "responses": {
@@ -136,13 +157,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "menus id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Authorization. How to input in swagger : 'Bearer \u003cinsert_your_token_here\u003e'",
                         "name": "Authorization",
                         "in": "header",
@@ -153,6 +167,13 @@ const docTemplate = `{
                         "description": "HTTP-X-UID. Fill with id user",
                         "name": "HTTP-X-UID",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "restaurant id",
+                        "name": "id",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -182,6 +203,41 @@ const docTemplate = `{
                     "restaurant"
                 ],
                 "summary": "Get All Restaurant",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/get_reset_link": {
+            "post": {
+                "description": "get Link by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get Reset Link",
+                "parameters": [
+                    {
+                        "description": "the body to get reset link password",
+                        "name": "Body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ResetLinkInput"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -260,6 +316,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/reset_password": {
+            "post": {
+                "description": "reset password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Reset Password",
+                "parameters": [
+                    {
+                        "description": "the body to reset password",
+                        "name": "Body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ResetPassInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/restaurant/create": {
             "post": {
                 "security": [
@@ -316,6 +409,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/send_review": {
+            "post": {
+                "security": [
+                    {
+                        "BearerToken": []
+                    }
+                ],
+                "description": "Endpoint for create review user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Create Review",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization. How to input in swagger : 'Bearer \u003cinsert_your_token_here\u003e'",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "HTTP-X-UID. Fill with id user",
+                        "name": "HTTP-X-UID",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "the body to create a review",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ReviewUserInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/show/order/:id/restaurant": {
             "get": {
                 "description": "Get Order by id",
@@ -365,6 +512,17 @@ const docTemplate = `{
                 }
             }
         },
+        "controllers.Menu": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
         "controllers.MenuParams": {
             "type": "object",
             "properties": {
@@ -386,6 +544,24 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/controllers.MenuParams"
+                    }
+                },
+                "restaurant_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.OrderMenuInput": {
+            "type": "object",
+            "required": [
+                "order_menu",
+                "restaurant_id"
+            ],
+            "properties": {
+                "order_menu": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controllers.Menu"
                     }
                 },
                 "restaurant_id": {
@@ -415,6 +591,32 @@ const docTemplate = `{
                 }
             }
         },
+        "controllers.ResetLinkInput": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.ResetPassInput": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "password"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "controllers.RestaurantInput": {
             "type": "object",
             "properties": {
@@ -422,6 +624,24 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.ReviewUserInput": {
+            "type": "object",
+            "required": [
+                "rating",
+                "restaurant_id"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "integer"
+                },
+                "restaurant_id": {
                     "type": "string"
                 }
             }
